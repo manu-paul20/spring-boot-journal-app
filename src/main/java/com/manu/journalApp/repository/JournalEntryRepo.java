@@ -7,4 +7,4 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Component;
 
 
-public interface JournalEntryRepo extends MongoRepository<JournalEntry, Long> { }
+public interface JournalEntryRepo extends MongoRepository<JournalEntry, String> { }
