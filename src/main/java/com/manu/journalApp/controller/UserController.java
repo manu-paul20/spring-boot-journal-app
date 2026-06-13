@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
@@ -18,43 +20,45 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping
-    public List<User> getAllUser() {
-        return userService.getAllUser();
-    }
 
-    @PostMapping
-    public ResponseEntity<?> addUser(@RequestBody User user) {
+    @PutMapping("/update")
+    public ResponseEntity<?> updateUser(@RequestBody User user){
         try {
-            userService.save(user);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userName =  authentication.getName();
+            User userInDb = userService.findByUserName(userName);
+
+            userInDb.setUserName(user.getUserName());
+            userInDb.setPassword(user.getPassword());
+
+            userService.save(userInDb);
             return new ResponseEntity<>(HttpStatus.OK);
-        } catch (DuplicateKeyException e) {
-            return new ResponseEntity<>("User already exists", HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @DeleteMapping("id/{uid}")
-    public ResponseEntity<?> deleteUser(@PathVariable String uid) {
+    @GetMapping
+    public ResponseEntity<User> getUser(){
         try {
-            userService.deleteUserById(uid);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userName = authentication.getName();
+            User userInDb = userService.findByUserName(userName);
+            return new ResponseEntity<>(userInDb,HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+           return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
     }
 
-    @GetMapping("id/{uid}")
-    public ResponseEntity<User> findUserById(@PathVariable String uid) {
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteUser(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
         try {
-            Optional<User> user = userService.findUserById(uid);
-            if (user.isPresent()) {
-                return new ResponseEntity<>(user.get(), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception e) {
+            userService.deleteByUserName(userName);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (Exception e){
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
