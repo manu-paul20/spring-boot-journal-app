@@ -16,6 +16,10 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    public List<User> getAll(){
+        return userRepo.findAll();
+    }
+
     /**
      * Saves a new user and encodes their password.
      * @param user user with userName and password in plaintext!!
@@ -23,6 +27,12 @@ public class UserService {
     public void saveNewUser(User user){
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(List.of("USER"));
+        userRepo.save(user);
+    }
+
+    public void saveNewAdmin(User user){
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRoles(List.of("USER","ADMIN"));
         userRepo.save(user);
     }
 

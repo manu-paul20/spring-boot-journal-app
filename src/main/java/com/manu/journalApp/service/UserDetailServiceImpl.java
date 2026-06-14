@@ -9,21 +9,22 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserDetailServiceImpl implements UserDetailsService {
+public class UserDetailServiceImpl implements UserDetailsService{
 
     @Autowired
     private UserRepo userRepo;
 
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepo.findByUserName(username);
-        if (user!=null){
+        if(user!=null){
             return org.springframework.security.core.userdetails.User.builder()
-                     .username(username)
-                     .password(user.getPassword())
-                     .roles(user.getRoles().toArray(String[]::new))
-                     .build();
+                    .username(user.getUserName())
+                    .password(user.getPassword())
+                    .roles(user.getRoles().toArray(String[]::new))
+                    .build();
         }
-        throw new UsernameNotFoundException("Username not found for : "+username);
+        throw new UsernameNotFoundException("User not found for username : "+username);
     }
 }
