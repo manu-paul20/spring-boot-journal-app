@@ -2,6 +2,7 @@ package com.manu.journalApp.service;
 
 import com.manu.journalApp.entity.JournalEntry;
 import com.manu.journalApp.entity.User;
+import com.manu.journalApp.exception.InvalidJournalIdException;
 import com.manu.journalApp.exception.UserNotFoundException;
 import com.manu.journalApp.repository.JournalEntryRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class JournalEntryService {
@@ -29,9 +29,9 @@ public class JournalEntryService {
      */
     public List<JournalEntry> getJournalEntriesByUserName(String userName) throws UserNotFoundException {
         User user = userService.findByUserName(userName);
-        if (user != null){
+        if (user != null) {
             return user.getJournalEntries();
-        }else {
+        } else {
             throw new UserNotFoundException();
         }
 
@@ -54,38 +54,52 @@ public class JournalEntryService {
 
     }
 
-    public Optional<JournalEntry> getById(String jid) {
-        return journalEntryRepo.findById(jid);
-
+    public JournalEntry getById(String userName, String jid) throws InvalidJournalIdException {
+        User user = userService.findByUserName(userName);
+        boolean isJournalPresent = user.getJournalEntries().stream().anyMatch(entry -> entry.getId().equals(jid));
+        if (isJournalPresent) {
+            return journalEntryRepo.findById(jid).get();
+        } else {
+            throw new InvalidJournalIdException();
+        }
     }
 
     public void deleteAll() {
         journalEntryRepo.deleteAll();
     }
 
+    @Transactional
     public void updateJournal(
             JournalEntry newEntry,
             String jid,
             String userName
-            ) throws UserNotFoundException {
-        Optional<JournalEntry> old = journalEntryRepo.findById(jid);
+    ) throws InvalidJournalIdException {
+
+
         User user = userService.findByUserName(userName);
-        if(user!=null){
-            old.ifPresent(oldEntry->{
-                oldEntry.setTitle((newEntry.getTitle().isBlank())?oldEntry.getTitle() : newEntry.getTitle());
-                oldEntry.setContent((newEntry.getContent().isBlank())?oldEntry.getContent() : newEntry.getContent());
-                journalEntryRepo.save(oldEntry);
-            });
-        }else {
-            throw new UserNotFoundException();
+        List<JournalEntry> entries = user.getJournalEntries().stream().filter(entry -> entry.getId().equals(jid)).toList();
+        if (!entries.isEmpty()) {
+            JournalEntry oldEntry = entries.getFirst();
+            oldEntry.setTitle((newEntry.getTitle().isBlank()) ? oldEntry.getTitle() : newEntry.getTitle());
+            oldEntry.setContent((newEntry.getContent().isBlank()) ? oldEntry.getContent() : newEntry.getContent());
+            journalEntryRepo.save(oldEntry);
+        } else {
+            throw new InvalidJournalIdException();
         }
+
     }
 
     @Transactional
-    public void deleteById(String jid,String userName) {
+    public void deleteById(String jid, String userName) throws InvalidJournalIdException {
         User user = userService.findByUserName(userName);
-        user.getJournalEntries().removeIf(entry->entry.getId().equals(jid));
-        userService.save(user);
-        journalEntryRepo.deleteById(jid);
+        List<JournalEntry> entries = user.getJournalEntries().stream().filter(entry->entry.getId().equals(jid)).toList();
+        if(!entries.isEmpty()) {
+            user.getJournalEntries().remove(entries.getFirst());
+            userService.save(user);
+            journalEntryRepo.deleteById(jid);
+        }else{
+            throw new InvalidJournalIdException();
+        }
+
     }
 }

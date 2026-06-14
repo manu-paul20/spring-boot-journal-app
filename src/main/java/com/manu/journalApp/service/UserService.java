@@ -1,18 +1,12 @@
 package com.manu.journalApp.service;
 
-import com.manu.journalApp.entity.JournalEntry;
 import com.manu.journalApp.entity.User;
 import com.manu.journalApp.repository.UserRepo;
-import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class UserService {
@@ -22,9 +16,32 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public void save(User user){
+    /**
+     * Saves a new user and encodes their password.
+     * @param user user with userName and password in plaintext!!
+     * */
+    public void saveNewUser(User user){
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setRoles(List.of("USER"));
+        userRepo.save(user);
+    }
+
+    /**
+     * Updates the existing user. Use it for updating other fields except the userName and password
+     * @param user user object with updated values
+     * */
+    public void save(User user){
+        userRepo.save(user);
+    }
+
+
+    /**
+     * only updates username and password
+     * */
+    public void updateUsernameAndPass(String userName,User newUser){
+        User user = userRepo.findByUserName(userName);
+        user.setUserName(newUser.getUserName());
+        user.setPassword(passwordEncoder.encode(newUser.getPassword()));
         userRepo.save(user);
     }
 

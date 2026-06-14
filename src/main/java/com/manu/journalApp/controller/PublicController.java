@@ -23,7 +23,7 @@ public class PublicController {
     @PostMapping("/create-user")
     public ResponseEntity<?> addUser(@RequestBody User user) {
         try {
-            userService.save(user);
+            userService.saveNewUser(user);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (DuplicateKeyException e) {
             return new ResponseEntity<>("User already exists", HttpStatus.BAD_REQUEST);
