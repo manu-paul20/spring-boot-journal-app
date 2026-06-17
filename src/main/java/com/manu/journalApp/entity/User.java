@@ -1,5 +1,6 @@
 package com.manu.journalApp.entity;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 import org.springframework.data.annotation.Id;
@@ -12,6 +13,7 @@ import java.util.List;
 
 @Document
 @Data
+@Builder
 public class User {
     @Id private String id;
     @Indexed(unique = true)

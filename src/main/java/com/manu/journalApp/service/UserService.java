@@ -5,11 +5,14 @@ import com.manu.journalApp.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Component
 public class UserService {
+
+
     @Autowired
     private UserRepo userRepo;
 
@@ -24,10 +27,18 @@ public class UserService {
      * Saves a new user and encodes their password.
      * @param user user with userName and password in plaintext!!
      * */
-    public void saveNewUser(User user){
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(List.of("USER"));
-        userRepo.save(user);
+
+    public boolean saveNewUser(User user){
+        try {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setRoles(List.of("USER"));
+            userRepo.save(user);
+            return true;
+        } catch (Exception e) {
+            return false;
+//            throw new RuntimeException(e);
+
+        }
     }
 
     public void saveNewAdmin(User user){
