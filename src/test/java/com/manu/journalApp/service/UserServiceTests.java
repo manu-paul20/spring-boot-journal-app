@@ -2,20 +2,12 @@ package com.manu.journalApp.service;
 
 import com.manu.journalApp.argumentsProvider.UserArgumentsProvider;
 import com.manu.journalApp.entity.User;
-import com.manu.journalApp.repository.UserRepo;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.CsvSources;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestComponent;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,28 +23,27 @@ public class UserServiceTests {
             "Manu",
             "Mili",
             "Amal",
-            "Ramu"
+
     })
-    public void findByUserNameTest(String userName){
+    public void findByUserNameTest(String userName) {
         assertNotNull(userService.findByUserName(userName));
     }
 
 
-
-
     @ParameterizedTest
     @CsvSource({
-          "1,1,2",
-          "1,2,3",
-          "2,5,7"
+            "1,1,2",
+            "1,2,3",
+            "2,5,7",
+            "2,6,8"
     })
-    public void test(int a,int b, int expected){
-        assertEquals(expected,a+b);
+    public void test(int a, int b, int expected) {
+        assertEquals(expected, a + b);
     }
 
     @ParameterizedTest
     @ArgumentsSource(UserArgumentsProvider.class)
-    public void saveNewUserTest(User user){
+    public void saveNewUserTest(User user) {
         assertTrue(userService.saveNewUser(user));
     }
 
