@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/public")
+@CrossOrigin(origins = "http://127.0.0.1:5500")
 public class PublicController {
 
 
@@ -29,7 +30,6 @@ public class PublicController {
         } catch (DuplicateKeyException e) {
             return new ResponseEntity<>("User already exists", HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
-            System.out.println("EX-"+e.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

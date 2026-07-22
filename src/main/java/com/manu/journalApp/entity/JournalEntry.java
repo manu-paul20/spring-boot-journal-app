@@ -2,9 +2,7 @@ package com.manu.journalApp.entity;
 
 
 import lombok.Data;
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 

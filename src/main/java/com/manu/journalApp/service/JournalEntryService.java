@@ -5,6 +5,9 @@ import com.manu.journalApp.entity.User;
 import com.manu.journalApp.exception.InvalidJournalIdException;
 import com.manu.journalApp.exception.UserNotFoundException;
 import com.manu.journalApp.repository.JournalEntryRepo;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
+@Slf4j
 public class JournalEntryService {
 
     @Autowired
@@ -22,19 +26,16 @@ public class JournalEntryService {
     @Autowired
     private UserService userService;
 
+
     /**
      * Find all journal entries of specific user
      *
      * @param userName username of that specific user
      * @return list of all journal entries of that user
      */
-    public List<JournalEntry> getJournalEntriesByUserName(String userName) throws UserNotFoundException {
+    public List<JournalEntry> getJournalEntriesByUserName(String userName)   {
         User user = userService.findByUserName(userName);
-        if (user != null) {
-            return user.getJournalEntries();
-        } else {
-            throw new UserNotFoundException();
-        }
+        return user.getJournalEntries();
 
 
     }
@@ -61,6 +62,7 @@ public class JournalEntryService {
         if (isJournalPresent) {
             return journalEntryRepo.findById(jid).get();
         } else {
+            log.error("JOURNAL NOT PRESENT");
             throw new InvalidJournalIdException();
         }
     }
