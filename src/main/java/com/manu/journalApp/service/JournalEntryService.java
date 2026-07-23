@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Component
+@Service
 @Slf4j
 public class JournalEntryService {
 
