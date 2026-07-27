@@ -4,11 +4,13 @@ import com.manu.journalApp.entity.JournalEntry;
 import com.manu.journalApp.entity.User;
 import com.manu.journalApp.repository.UserRepoImpl;
 import com.manu.journalApp.service.EmailService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -26,7 +28,7 @@ public class UserScheduler {
     private final UserRepoImpl userRepo;
     private final EmailService emailService;
 
-    @Scheduled(cron = "* * 9 * * SUN")
+//    @Scheduled(cron = "0 0 /2 * * *")
     public void fetchUserAndSaMail(){
         List<User> users = userRepo.getUserForSA();
         users.forEach(user->{
@@ -35,7 +37,6 @@ public class UserScheduler {
                             .getDate()
                             .isAfter(LocalDateTime.now(ZoneId.of("UTC")).minusDays(7)))
                     .map(JournalEntry::getContent).toList();
-
             emailService.sendEmail(user.getEmail(),"SENTIMENT ANALYSIS",journalEntries.toString());
         });
     }
