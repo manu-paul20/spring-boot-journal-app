@@ -3,41 +3,39 @@ package com.manu.journalApp.scheduler;
 import com.manu.journalApp.entity.JournalEntry;
 import com.manu.journalApp.entity.User;
 import com.manu.journalApp.repository.UserRepoImpl;
-import com.manu.journalApp.service.EmailService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Component
 public class UserScheduler {
 
+    private final UserRepoImpl userRepo;
+    private final KafkaTemplate<String, User> kafkaTemplate;
     @Autowired
-    public UserScheduler(EmailService emailService, UserRepoImpl userRepo) {
-        this.emailService = emailService;
+    public UserScheduler(KafkaTemplate<String, User> kafkaTemplate, UserRepoImpl userRepo) {
+        this.kafkaTemplate = kafkaTemplate;
         this.userRepo = userRepo;
     }
 
-    private final UserRepoImpl userRepo;
-    private final EmailService emailService;
-
-//    @Scheduled(cron = "0 0 /2 * * *")
-    public void fetchUserAndSaMail(){
+//    @Scheduled(cron = "0 * * * * *")
+    public void fetchUserAndSaMail() {
         List<User> users = userRepo.getUserForSA();
-        users.forEach(user->{
-            List<String> journalEntries = user.getJournalEntries().stream()
-                    .filter(entry -> entry
-                            .getDate()
-                            .isAfter(LocalDateTime.now(ZoneId.of("UTC")).minusDays(7)))
-                    .map(JournalEntry::getContent).toList();
-            emailService.sendEmail(user.getEmail(),"SENTIMENT ANALYSIS",journalEntries.toString());
-        });
+        User user2 =  User.builder()
+                .userName("Mili")
+                .id("mili1")
+                .password("pass")
+                .roles(new ArrayList<>())
+                .email("mili@gmail.com")
+                .journalEntries(new ArrayList<>())
+                .sentimentAnalysis(true)
+                .build();
+        kafkaTemplate.send("sample", user2.getUserName(), user2);
     }
 }

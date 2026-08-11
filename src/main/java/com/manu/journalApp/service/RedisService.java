@@ -7,6 +7,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.Stack;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
@@ -31,9 +33,13 @@ public class RedisService {
     public <T> T get(String key,Class<T> entityClass){
         try {
             String value =  redisTemplate.opsForValue().get(key);
+            if(value == null){
+                return null;
+            }
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(value, entityClass);
         } catch (Exception e) {
+
             log.error("ERROR = {}",e.getMessage());
             return null;
         }
@@ -43,10 +49,16 @@ public class RedisService {
         try {
             ObjectMapper mapper = new ObjectMapper();
            String json =  mapper.writeValueAsString(value);
-            redisTemplate.opsForValue().set(key,json,expiry);
+            redisTemplate.opsForValue().set(key,json,expiry, TimeUnit.SECONDS);
         } catch (Exception e) {
             log.error("ERROR = {}",e.getMessage());
         }
+
+    }
+
+    public void delete(String userName){
+        redisTemplate.delete(userName);
+
 
     }
 }
